@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+{% extends "base/base.html" %}
+{% load static %}
+
+
+{% block title %}
+
+
+Homepage
+
+
+{% endblock %}
+
+
+{% block body %}
+
+<div class="container">
+
+    <h4 style="color: white; text-align: center; margin: 10vh;">名前修正</h4>
+
+    <form method="post" action="{% url 'core:set_new_chat_history_title' %}" enctype="multipart/form-data">
+
+        {% csrf_token %}
+        <input type="text" name="sess_id" id="sess_id" value="{{id}}" style="display: none;">
+        
+        <input type="text" class="form-control" name="new_session_name" id="new_session_name" placeholder="新しい名前">
+        
+        <br><br>
+        <button class="btn btn-success" type="submit" style="width: 30%; margin: 5% 10%;"> 設定 </button>
+
+        <button class="btn btn-danger" type="button" style="width: 30%;"> 終了 </button>
+
+    </form>
+
+</div>
+
+{% endblock %}

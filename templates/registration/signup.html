@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+{% extends "base/base.html" %}
+{% load static %}
+{% load bootstrap_tags %}
+
+
+{% block title %}
+
+
+Signup
+
+
+{% endblock %}
+
+{% block body %}
+        {% if registered %}
+            <h1 class="centeralign">登録しました</h1>
+            <br>
+		    <h4 class="centeralign topmargin" ><a href="{% url 'core:home' %}"> ホームページへ </a> </h4>
+
+
+        {% else %}
+            <h3 class="registration_page_header centeralign topmargin">SICGPT 新規登録</h3>
+            <!-- user the enctype attribute because we are uploading images  -->
+            <form enctype="multipart/form-data" method="POST">
+                <div class="container sign-form">
+                    <div class="jumbotron">
+                        {% csrf_token %}
+                    
+                        {{ user_form |as_bootstrap  }}
+                        {{ user_profileform |as_bootstrap  }}
+
+
+
+
+                    
+                        <!-- {{ user_profileform.as_p }} -->
+                        <input type="submit" name="submit" value="登録">
+                        <a href="{% url 'registration:signin' %}"> <button type="button"> サインイン </button>  </a>
+
+                    </div>
+                </div>
+            </form>
+        {% endif %}
+        </div>
+
+
+{% endblock %}

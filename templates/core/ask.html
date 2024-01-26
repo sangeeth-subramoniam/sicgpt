@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/sic_gpt/sic_gpt_home.css' %}">
+    <title>{{title}}</title>
+
+    <style>
+  #typed-text {
+    white-space: pre-wrap; /* Allow line breaks */
+    overflow: hidden;
+    border-right: 1px solid #000;
+    animation: typing 4s steps(40, end), blink-caret 0.5s step-end infinite;
+    caret-color: transparent;
+    /* Increase the animation duration to ensure the text is fully displayed */
+
+    background-color: #74AA9C;
+    border-radius: 3px;
+    padding: 1vh;
+    border-right: 1px solid black;
+  }
+
+  @keyframes typing {
+    from {
+      width: 0;
+    }
+    to {
+      width: 100%;
+    }
+  }
+
+  @keyframes blink-caret {
+    from, to {
+      border-color: transparent;
+    }
+    50% {
+      border-color: transparent;
+    }
+  }
+
+
+</style>
+
+
+</head>
+<body>
+    <header>
+        <h1>SIC GPT BOT</h1>
+    </header>
+    <main>
+
+        <form method="post" enctype="multipart/form-data">
+
+            {% csrf_token %}
+
+            <div class="chat-container">
+                <div class="chat">
+                    <div class="chat-messages" id="chat-messages">
+                        <!-- Chat messages will be displayed here -->
+
+                        {% if gpt_response %}
+                            <p> ユーザー : {{ user_question }} </p>
+                            SICボット : <p id="typed-text"> {{ gpt_response }} </p>
+                        {% else %}
+
+                        {% endif %}
+
+                    </div>
+                    <div class="user-input">
+                        <input type="text" id="user_question" name="user_question" placeholder="Ask Question">
+                        <button id="send-button" type="submit">ASK</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+    </main>
+
+
+    <script>
+    const textElement = document.getElementById('typed-text');
+    const textToType = textElement.textContent;
+
+    textElement.textContent = '';
+
+    function typeText() {
+      for (let i = 0; i < textToType.length; i++) {
+        setTimeout(() => {
+          textElement.textContent += textToType[i];
+        }, i * 50); // Adjust the delay time (in milliseconds) to control typing speed
+      }
+    }
+
+    window.addEventListener('load', typeText);
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+{% extends "base/base.html" %}
+{% load static %}
+
+
+{% block title %}
+
+
+Homepage
+
+
+{% endblock %}
+
+
+{% block body %}
+
+    
+
+    <main>
+
+        <div class="chat_session_container">
+            
+            <div class="chat_session">
+
+                <div class="chat_session_content">
+                    <h5 class="chat_session_content_header centeralign">チャット履歴</h5>
+                    <br>                    
+                        {% for it in  users_sessions%}
+                        
+                            <div class="session-item session-item-{{forloop.counter}}" id="session-item">
+                                <button href="#" id="session_item_pencil_{{forloop.counter}}" class="edit-icon-link edit-icon-pencil">
+                                    <span class="edit-icon">&#9998;</span>
+                                </button>
+                                <a href="{% url 'core:home_with_parameters' it.id %}" class="session-text-link">
+                                    <span class="chat_session_content_text"> {{ it.chat_history_title }}</span>
+                                </a>
+                            </div>
+                            
+
+                            <!-- edit form -->
+                            
+                            <div class="session-item-namechange-form session-item-namechange-form-{{forloop.counter}} " id="session-item-namechange-form" style="display: none;">
+                                <form action="{% url 'core:change_session_name' %}" method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <div class="session-item-namechange-form-button-div">
+                                    <span class="edit-icon" ><button type="submit" class="session-item-namechange-form-button session-item-namechange-form-buttons-anchor-submit" style="color: green;">&#x2714; </button></span>
+                                    <span class="edit-icon" ><button type="button" onclick="hide_session_item_namechange_form();" class="session-item-namechange-form-button session-item-namechange-form-buttons-anchor-close" style="color: red;">X</a></span>
+                                </div>
+                                    <input type="text" name="change_session_name" id="change_session_name" value="{{it.chat_history_title}}" required>
+                                    <input type="text" name="change_session_name_id" id="change_session_name_id" value="{{it.id}}" style="display: none;">
+                                    <button type="submit" style="display: none;">submit</button>
+                                </form>
+                            </div>
+                            
+                        
+                        {% endfor %}
+                    
+                    
+                    <!-- <p class="chat_session_content_text_day">今日</p>
+                    <p class="chat_session_content_text">テスト1</p>
+                    <p class="chat_session_content_text">テスト2</p>
+                    <p class="chat_session_content_text">テスト3</p>
+                    <p class="chat_session_content_text">テスト4</p>
+
+                    <br>
+
+                    <p class="chat_session_content_text_day">昨日</p>
+                    <p class="chat_session_content_text">テスト1</p>
+                    <p class="chat_session_content_text">テスト2</p>
+                    <p class="chat_session_content_text">テスト3</p> -->
+
+                </div>
+
+                <div class="chat_session_create_new">
+                    <a class="create_new_chat_link" href="{% url 'core:create_new_chat' %}">
+                        <h5 class="chat_session_create_new_text"><span class="fa-stack fa-sm"><i class="fa fa-circle fa-stack-2x icon_background_circle"></i><i class="fas fa-plus user_icon fa-stack-1x fa-inverse"></i></span> New Chat   </h5> 
+                    </a>
+                </div>
+                
+                <br>
+                <div class="chat_session_user">
+                    <h5 class="centeralign"><span class="fa-stack fa-sm"><i class="fa fa-circle fa-stack-2x icon_background_circle"></i><i class="far fa-user user_icon fa-stack-1x fa-inverse"></i></span> {{ request.user.username }}</h5>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="chat-container">
+
+            <div class="auth_bar">
+
+                
+                {% if curr_user %}
+                    <p class="auth_bar-content"> <a class="auth_bar-content_link" href="{% url 'registration:signout' %}"> サインアウト </a> </p>
+                    <p class="auth_bar-content"> ({{curr_user}}さん) </p>
+                {% else %}
+                    <!-- <p class="auth_bar-content"> <a class="auth_bar-content_link" href="{% url 'registration:signup' %}"> 新規登録 </a> </p> -->
+                    <p class="auth_bar-content"> <a class="auth_bar-content_link" href="{% url 'registration:signin' %}"> サインイン </a> </p>
+                {% endif %}
+            </div>
+
+
+            <form id="chat_question_form" method="post" enctype="multipart/form-data">
+
+                {% csrf_token %}
+
+                    <!-- Current session -->
+                    <input type="text" name="curr_session_id" id="curr_session_id" value="{{chat_session.id}}" style="display: none;">
+                
+                    <div class="chat">
+                        <div class="chat-messages" id="chat-messages">
+                            <!-- Chat messages will be displayed here -->
+
+                            <h5 class="centeralign" style="color: #ececf1;"> {{chat_session.chat_history_title}} - {{ chat_session.created }} </h5>
+
+                            {% if question_answer_list %}
+
+                                {% for q,a in question_answer_list  %}
+
+                                    <p id="user_question_display"> <span id="user_question_display_bold"> <span class="fa-stack fa-sm"><i class="fa fa-circle fa-stack-2x icon_background_circle"></i><i class="far fa-user user_icon fa-stack-1x fa-inverse"></i></span> {{curr_user}}さん : </span>{{q}} </p>
+                                    <span id="bot_answer"> <span class="fa-stack fa-sm"><i class="fa fa-circle fa-stack-2x bot_icon_background_circle"></i><i class="fas fa-atom user_icon fa-stack-1x fa-inverse"></i></span> AI : </span> <p id="typed-text-old"> {{ a }} </p>
+                                    
+                                {% endfor %}
+
+                                {% if gpt_response %}
+                                    <p id="user_question_display"> <span id="user_question_display_bold"><span class="fa-stack fa-sm"><i class="fa fa-circle fa-stack-2x icon_background_circle"></i><i class="far fa-user user_icon fa-stack-1x fa-inverse"></i></span> {{curr_user}}さん : </span>{{ user_question }} </p>
+                                    <span id="bot_answer"><span class="fa-stack fa-sm"><i class="fa fa-circle fa-stack-2x bot_icon_background_circle"></i><i class="fas fa-atom user_icon fa-stack-1x fa-inverse"></i></span> AI : </span> <p id="typed-text"> {{ gpt_response }} </p>
+                                {% endif %}
+
+                            {% else %}
+
+                                <h6 class="starting_help_text_model">SICGPT 4.0 <i class="fas fa-caret-down"></i></h6>
+
+                                <div class="starting_help_text">
+                                    <i class="fas fa-atom starting_help_text_logo"></i><br>
+                                    <h4>How can I help you today?</h4>
+                                </div>
+
+                            {% endif %}
+
+                        </div>
+                        
+                        <div class="user-input">
+                            
+                            <!-- <input type="text" id="user_question" name="user_question" placeholder="Asks Question"> -->
+
+                            <textarea id="user_question" class="user_question" name="user_question" rows="2" cols="120" placeholder="Message AI"></textarea>
+                            
+                            <button id="send-button-dummy" class="send-button" type="button"><i class="fas fa-arrow-up"></i></button>
+                            <button id="send-button-dummy-spinner" class="send-button" type="button" style="display: none;"><i class="fas fa-spinner spinner fa-spin"></i></button>
+                        </div>
+                    </div>
+            </form>
+        </div>
+
+    </main>
+
+
+    <script>
+
+    
+    
+
+
+    var buttons = document.querySelectorAll('.edit-icon-link');
+        buttons.forEach(function(button) {
+            button.addEventListener('click', function() {
+                // alert(this.id);
+                full_id_number = this.id
+                var id_part = full_id_number.split("_");
+                var id_number = id_part[id_part.length - 1];
+                // alert(id_number)
+                edit_class = "session-item-" + id_number
+                // alert(edit_class)
+                var edit_div = document.getElementsByClassName(edit_class)[0];
+                // alert(edit_div)
+                
+                edit_form_class = "session-item-namechange-form-" + id_number
+                var edit_form = document.getElementsByClassName(edit_form_class)[0];
+                // alert(edit_form_class)
+                // alert(edit_form.className.split(' '))
+
+                var clicked_edit_forms_classes = edit_form.className.split(' ')
+
+                
+                var all_forms = document.querySelectorAll('.session-item')
+                all_forms.forEach(function(all_forms) {
+                    // alert('enter all forms')
+                    // alert(all_forms)
+                    // alert(all_forms.className.split(' '))
+                    all_forms.style.display = 'block'
+                })
+                
+                
+                
+                var all_edit_forms = document.querySelectorAll('.session-item-namechange-form')
+                all_edit_forms.forEach(function(all_edit_forms) {
+                    // alert('enter all forms')
+                    // alert(all_edit_forms)
+                    // alert(all_edit_forms.className.split(' '))
+                    all_edit_forms.style.display = 'none';
+                })
+
+                
+                if(edit_div) {
+                    edit_div.style.display = 'none';
+                }
+
+                if(edit_form) {
+                    edit_form.style.display = 'block';
+                }
+
+                // document.getElementById('session-item').style.display = 'none';
+                // document.getElementById('session-item-namechange-form').style.display = 'block';
+
+            });
+        });
+
+
+
+        document.getElementById('send-button-dummy').addEventListener('click', submitForm);
+
+        function submitForm(){
+
+            chat_question_form = document.getElementById('chat_question_form');
+            chat_question_form_submit_button = document.getElementById('send-button-dummy');
+            chat_question_form_submit_spinner_button = document.getElementById('send-button-dummy-spinner');
+
+            var user_question_content = document.getElementById('user_question').value;
+            
+            if(user_question_content.trim() === ""){
+                console.log('Empty submit')
+            }else{
+                chat_question_form_submit_button.style.display = "none";
+                chat_question_form_submit_button.disabled = true;
+                chat_question_form_submit_spinner_button.style.display = "block";
+                chat_question_form.submit();
+            }           
+
+
+        }
+
+
+
+        document.getElementById('user_question').addEventListener('keydown', function(event) {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault(); // Prevent the default action to stop from inserting a newline
+            
+            var user_question_content = document.getElementById('user_question').value;
+
+            if(user_question_content.trim() === ""){
+                console.log('Empty submit')
+            }else{
+
+                chat_question_form = document.getElementById('chat_question_form');
+                chat_question_form_submit_button = document.getElementById('send-button-dummy');
+                chat_question_form_submit_spinner_button = document.getElementById('send-button-dummy-spinner');
+
+                chat_question_form_submit_button.style.display = "none";
+                chat_question_form_submit_button.disabled = true;
+                chat_question_form_submit_spinner_button.style.display = "block";
+                chat_question_form.submit(); // Submit the form
+            }
+            
+            
+        }
+    });
+
+
+
+
+    
+    function hide_session_item(){
+        // alert('clicked hide session item')
+        document.getElementById('session-item').style.display = 'none';
+        document.getElementById('session-item-namechange-form').style.display = 'block';
+
+    }
+
+    function hide_session_item_namechange_form(){
+        // alert('clicked session-item-namechange-form')
+        // document.getElementById('session-item-namechange-form').style.display = 'none';
+        // document.getElementById('session-item').style.display = 'block';
+        window.location.href = '/';
+    }
+    
+
+
+
+    window.addEventListener('load', typeText);
+
+    const textElement = document.getElementById('typed-text');
+    const textToType = textElement.textContent;
+
+    textElement.textContent = '';
+
+    function typeText() {
+        
+        // alert('test');
+        // alert(textElement)
+
+        chat_div = document.getElementById('chat-messages')
+
+        
+
+        chat_div.scrollTop = chat_div.scrollHeight;
+
+        for (let i = 0; i < textToType.length; i++) {
+            setTimeout(() => {
+                textElement.textContent += textToType[i];
+            }, i * 50); // Adjust the delay time (in milliseconds) to control typing speed
+        }
+    }
+    </script>
+
+
+{% endblock %}

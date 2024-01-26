@@ -1,0 +1,41 @@
+{% extends 'base/base.html' %}
+{% block title %} Login Page {% endblock %}
+
+
+{% block body%}
+
+    <h3 class="registration_page_header centeralign topmargin" >SICGPT サインイン</h3>
+
+    <div class="container">
+    <div class="jumbotron fj">
+
+        <form action="{% url  'registration:signin' %}" method="POST">
+
+
+            {% csrf_token %}
+            <label for="username"> ユーザー名 </label>
+            <input type="text" name = "username" placeholder="例：山田"  >
+
+
+            <br>
+            <br>
+
+
+            <label for="password"> パスワード </label>
+            <input type="password" style="width: 80%; border: none;" name = "password" placeholder="パスワード "  >
+
+
+            <br>
+            <br>
+
+
+            <input type="submit" value="サインイン" style="width: 30%; margin-left: 35%;">
+            <!-- <a href="{% url 'registration:signup' %}"> <button type="button"> 新規登録 </button>  </a> -->
+        
+        </form>
+    </div>
+</div>
+
+
+
+{% endblock %}
